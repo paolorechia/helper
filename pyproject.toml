@@ -7,4 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]>=0.143.0",
     "httpx>=0.28.1",
+    "kokoro>=0.9.4",
+    "numpy>=2.5.4",
+    "sounddevice>=0.5.6",
 ]
