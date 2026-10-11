@@ -21,7 +21,7 @@ Below you'll have the entire chat history from this session.
 
 Try to respond as succintly and naturally as possible, assume this is a voice chat.
 
-USE ONLY ONE SENTENCE AT A TIME
+USE ONLY ONE SENTENCE AT A TIME.
 
 EXCEPT WHEN EXPLICITLY ASKED OTHERWISE BY THE USER.
 
@@ -68,10 +68,10 @@ async def root(body: dict):
         for _, _, audio in generator:
             if audio is not None:
                 audio_chunks.append(audio)
-                
+
         if not audio_chunks:
             raise HTTPException(status_code=500, detail="Failed to generate audio")
-            
+
         # Concatena os arrays NumPy diretamente na memória
         full_audio = np.concatenate(audio_chunks)
         
