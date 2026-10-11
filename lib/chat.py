@@ -21,6 +21,7 @@ class Chat:
     messages: list [OpenAIMessage] = field(default_factory=list)
 
     def add_system_instruction(self, text: str):
+        print(f"Adding system instruction: {text}")
         self.messages.append(
             OpenAIMessage(
                 role=OpenAIRole.system,
@@ -40,5 +41,5 @@ class Chat:
         chat_text = []
         for message in self.messages:
             chat_text.append(message.as_dict())
-        print(f"Generated prompt: {chat_text}")
+        # print(f"Generated prompt: {chat_text}")
         return chat_text
