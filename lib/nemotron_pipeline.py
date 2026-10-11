@@ -28,7 +28,6 @@ class NemotronRealTimePipeline:
         )
         self.model.eval()
         self.processor.set_streaming_mode("ultra_low_latency")
-        self.committed_until = 0.0
         print(f"Model ready. Buffer latency: {self.processor.streaming_latency_ms} ms")
 
 
@@ -121,6 +120,3 @@ class NemotronRealTimePipeline:
     def publish_segment_event(self, event: SpeakerSegmentEvent):
         """Converts events as dictionaries and push to output queue for main process."""
         self.segment_output_queue.put(event.as_dict())
-
-if __name__ == "__main__":
-    main()
