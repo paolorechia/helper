@@ -16,8 +16,8 @@ def start_nemotron(event_queue):
 if __name__ == "__main__":
     event_queue = mp.Queue()
 
-    # nemotron_process = mp.Process(target=start_nemotron, args=(event_queue,))
-    # nemotron_process.start()
+    nemotron_process = mp.Process(target=start_nemotron, args=(event_queue,))
+    nemotron_process.start()
 
     moonshine_process = mp.Process(target=start_moonshine, args=(event_queue,))
     moonshine_process.start()
