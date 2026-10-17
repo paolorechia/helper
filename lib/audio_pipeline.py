@@ -4,11 +4,11 @@ import time
 
 from dataclasses import dataclass
 
-
 DEFAULT_SAMPLE_RATE = 16_000
 DEFAULT_BLOCK_SIZE = 1600
 DEFAULT_DTYPE = "float32"
 DEFAULT_CHANNELS = 1
+
 
 @dataclass
 class AudioPipelineConfig:
@@ -16,6 +16,7 @@ class AudioPipelineConfig:
     channels = DEFAULT_CHANNELS
     dtype = DEFAULT_DTYPE
     blocksize = DEFAULT_BLOCK_SIZE
+
 
 class AudioPipeline:
     """Produces a audio input stream (microphone) for downstream consumption."""
@@ -45,15 +46,11 @@ class AudioPipeline:
         for queue in self.audio_queues:
             queue.put(indata[:, 0].copy())
 
-
     @classmethod
     def start_audio_pipeline(
-        cls,
-        audio_queues: list[queue.Queue],
-        audio_pipeline_config: AudioPipelineConfig
+        cls, audio_queues: list[queue.Queue], audio_pipeline_config: AudioPipelineConfig
     ):
         """Starts base audio pipeline to capture microphone audio."""
         AudioPipeline(
-            config=audio_pipeline_config,
-            audio_queues=audio_queues
+            config=audio_pipeline_config, audio_queues=audio_queues
         ).run_loop()

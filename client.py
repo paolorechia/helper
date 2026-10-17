@@ -6,9 +6,6 @@ from lib.moonshine_pipeline import MoonshineRealTimePipeline
 from lib.nemotron_pipeline import NemotronRealTimePipeline
 from lib.segments import SpeakerSegmentEvent
 
-
-
-
 if __name__ == "__main__":
     # Create base queues for inter-process communication
     mp.set_start_method("spawn")
@@ -20,20 +17,34 @@ if __name__ == "__main__":
     # Create processes
     audio_pipeline_config = AudioPipelineConfig()  # use default values
     audio_pipeline_process = mp.Process(
-        target=AudioPipeline.start_audio_pipeline, args=([nemotron_audio_queue, moonshine_audio_queue], audio_pipeline_config,)
+        target=AudioPipeline.start_audio_pipeline,
+        args=(
+            [nemotron_audio_queue, moonshine_audio_queue],
+            audio_pipeline_config,
+        ),
     )
     nemotron_process = mp.Process(
-        target=NemotronRealTimePipeline.start_nemotron, args=(nemotron_audio_queue, audio_pipeline_config, event_queue,)
+        target=NemotronRealTimePipeline.start_nemotron,
+        args=(
+            nemotron_audio_queue,
+            audio_pipeline_config,
+            event_queue,
+        ),
     )
     moonshine_process = mp.Process(
-        target=MoonshineRealTimePipeline.start_moonshine, args=(moonshine_audio_queue, audio_pipeline_config, event_queue,)
+        target=MoonshineRealTimePipeline.start_moonshine,
+        args=(
+            moonshine_audio_queue,
+            audio_pipeline_config,
+            event_queue,
+        ),
     )
     created_processes = [
         ("audio_pipeline", audio_pipeline_process),
         ("nemotron", nemotron_process),
         ("moonshine", moonshine_process),
     ]
-    
+
     # Start processes
     for name, p in created_processes:
         p.start()

@@ -1,6 +1,8 @@
 """OpenRouter's chat-completions API, using the existing HTTP dependency."""
+
 import os
 import httpx
+
 
 class OpenRouterProvider:
     def __init__(self, model: str, max_tokens: int, timeout: float):
@@ -8,10 +10,16 @@ class OpenRouterProvider:
         self.max_tokens = max_tokens
         self.timeout = timeout
 
-    def generate(self, messages_prompt: list, session_id: str, ) -> str:
+    def generate(
+        self,
+        messages_prompt: list,
+        session_id: str,
+    ) -> str:
         api_key = os.environ.get("OPENROUTER_API_KEY")
         if not api_key:
-            raise ValueError("Set OPENROUTER_API_KEY in your environment before calling OpenRouter.")
+            raise ValueError(
+                "Set OPENROUTER_API_KEY in your environment before calling OpenRouter."
+            )
 
         status_code = None
         text = None
@@ -37,7 +45,9 @@ class OpenRouterProvider:
                 response.raise_for_status()
 
         except Exception as excp:
-            raise ValueError(f"HTTP REQUEST FAILED (code: {status_code}): {text}") from excp
+            raise ValueError(
+                f"HTTP REQUEST FAILED (code: {status_code}): {text}"
+            ) from excp
 
         payload = response.json()
         text = payload["choices"][0]["message"]["content"]

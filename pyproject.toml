@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12, <3.13"
 dependencies = [
     "accelerate>=1.15.0",
+    "black>=26.10.1",
     "cython>=3.3.0",
     "ddgs>=9.16.0",
     "fastapi[standard]>=0.143.0",
@@ -18,6 +19,7 @@ dependencies = [
     "neptune>=1.14.0.post2",
     "numpy>=2.5.4",
     "packaging>=26.3",
+    "pre-commit>=4.7.0",
     "pytorch-lightning>=2.0.0,<2.4.0",
     "requests>=2.34.2",
     "setuptools>=84.0.0",

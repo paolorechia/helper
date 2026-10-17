@@ -1,15 +1,18 @@
 from enum import StrEnum
 from dataclasses import dataclass
 
+
 class SpeakerSegmentState(StrEnum):
     closed = "closed"
     open = "open"
     unknown = "unknown"
 
+
 class EventType(StrEnum):
     abstract = "abstract"
     asr_segment = "asr_segment"
     diarization_segment = "diarization_segment"
+
 
 @dataclass
 class Event:
@@ -30,7 +33,7 @@ class SpeakerSegmentEvent:
             "speaker": self.speaker,
             "start": self.start,
             "end": self.end,
-            "type_": self.type_
+            "type_": self.type_,
         }
 
     @classmethod
@@ -40,6 +43,7 @@ class SpeakerSegmentEvent:
 
         lower_case = {k.lower(): v for k, v in d.items()}
         return SpeakerSegmentEvent(**lower_case)
+
 
 @dataclass
 class ASRSegmentEvent:
@@ -53,7 +57,7 @@ class ASRSegmentEvent:
             "start": self.start,
             "end": self.end,
             "text": self.text,
-            "type_": self.type_
+            "type_": self.type_,
         }
 
     @classmethod

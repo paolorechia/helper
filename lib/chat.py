@@ -1,11 +1,12 @@
-
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
+
 
 class OpenAIRole(StrEnum):
     user = "user"
     assistant = "assistant"
     system = "system"
+
 
 @dataclass
 class OpenAIMessage:
@@ -18,16 +19,11 @@ class OpenAIMessage:
 
 @dataclass
 class Chat:
-    messages: list [OpenAIMessage] = field(default_factory=list)
+    messages: list[OpenAIMessage] = field(default_factory=list)
 
     def add_system_instruction(self, text: str):
         print(f"Adding system instruction: {text}")
-        self.messages.append(
-            OpenAIMessage(
-                role=OpenAIRole.system,
-                content=text
-            )
-        )
+        self.messages.append(OpenAIMessage(role=OpenAIRole.system, content=text))
 
     def add_user_message(self, text: str):
         print(f"Adding user message: {text}")

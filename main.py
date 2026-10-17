@@ -52,6 +52,7 @@ open_router_provider = OpenRouterProvider(MODEL, MAX_TOKENS, TIMEOUT)
 global_chat = Chat()
 global_chat.add_system_instruction(DEFAULT_PROMPT)
 
+
 @app.post("/")
 async def root(body: dict):
     if transcription := body.get("data", {}).get("transcription", None):
@@ -74,9 +75,9 @@ async def root(body: dict):
 
         # Concatena os arrays NumPy diretamente na memória
         full_audio = np.concatenate(audio_chunks)
-        
+
         # sd.play envia o áudio diretamente para o CoreAudio do macOS em background.
         # O FastAPI responde imediatamente enquanto o som começa a tocar.
         sd.play(full_audio, SAMPLE_RATE)
-        
+
     return {"chat": global_chat.to_openai_prompt()}

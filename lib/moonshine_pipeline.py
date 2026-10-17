@@ -8,12 +8,13 @@ from moonshine_voice import Transcriber, TranscriptEventListener, ModelArch
 from lib.segments import ASRSegmentEvent
 from lib.audio_pipeline import AudioPipelineConfig
 
+
 class MoonshineRealTimePipeline:
     def __init__(
         self,
         input_audio_queue: queue.Queue,
         audio_pipeline_config: AudioPipelineConfig,
-        output_event_queue: queue.Queue
+        output_event_queue: queue.Queue,
     ):
         # TODO: use input audio queue and audio pipeline config
         self.input_audio_queue = input_audio_queue
@@ -22,20 +23,17 @@ class MoonshineRealTimePipeline:
         self.model_arch = ModelArch.MEDIUM_STREAMING
         self.audio_pipeline_config = audio_pipeline_config
 
-
         if audio_pipeline_config.dtype != "float32":
-            raise ValueError(f"Moonshine pipeline does not support this dtype: {audio_pipeline_config.dtype}")
-
-        self.transcriber = (
-            Transcriber(
-                model_path=self.model_path,
-                model_arch=self.model_arch,
+            raise ValueError(
+                f"Moonshine pipeline does not support this dtype: {audio_pipeline_config.dtype}"
             )
+
+        self.transcriber = Transcriber(
+            model_path=self.model_path,
+            model_arch=self.model_arch,
         )
-        self.transcriber.add_listener(
-            ASRListener(self.output_event_queue)
-        )
-    
+        self.transcriber.add_listener(ASRListener(self.output_event_queue))
+
     def run_loop(self):
         self.transcriber.start()
         print("Moonshine Ready")
@@ -44,11 +42,8 @@ class MoonshineRealTimePipeline:
             while True:
                 audio_block = self.input_audio_queue.get()
                 self.transcriber.add_audio(
-                    np.asarray(
-                        audio_block,
-                        dtype=np.float32
-                    ),
-                    self.audio_pipeline_config.sample_rate
+                    np.asarray(audio_block, dtype=np.float32),
+                    self.audio_pipeline_config.sample_rate,
                 )
         finally:
             self.transcriber.stop()
@@ -58,15 +53,14 @@ class MoonshineRealTimePipeline:
         cls,
         input_audio_queue: queue.Queue,
         audio_pipeline_config: AudioPipelineConfig,
-        output_event_queue: queue.Queue
+        output_event_queue: queue.Queue,
     ):
         """Starts ASR pipeline."""
         MoonshineRealTimePipeline(
             input_audio_queue=input_audio_queue,
             audio_pipeline_config=audio_pipeline_config,
-            output_event_queue=output_event_queue
+            output_event_queue=output_event_queue,
         ).run_loop()
-
 
 
 class ASRListener(TranscriptEventListener):
