@@ -1,26 +1,30 @@
 import queue
 import numpy as np
-import sounddevice as sd
 import torch
 
 from transformers import (
     AutoModelForAudioFrameClassification,
     AutoProcessor,
 )
+from lib.audio_pipeline import AudioPipelineConfig
 from lib.segments import SpeakerSegmentState, SpeakerSegmentEvent
 
 MODEL_ID = "nvidia/Nemotron-3-Diarization"
-SAMPLE_RATE = 16_000
 FRAME_S = 0.01
 EPS = 1e-3
 
 class NemotronRealTimePipeline:
-    def __init__(self, segment_output_queue: queue.Queue):
+    def __init__(
+        self,
+        input_audio_queue: queue.Queue,
+        audio_pipeline_config: AudioPipelineConfig,
+        output_event_queue: queue.Queue
+    ):
         print("Loading Nemotron...")
         self.model_id = MODEL_ID
-        self.sample_rate = SAMPLE_RATE
-        self.audio_queue = queue.Queue()
-        self.segment_output_queue = segment_output_queue
+        self.sample_rate = audio_pipeline_config.sample_rate
+        self.input_audio_queue = input_audio_queue
+        self.output_event_queue = output_event_queue
         self.processor = AutoProcessor.from_pretrained(MODEL_ID)
         self.model = AutoModelForAudioFrameClassification.from_pretrained(
             MODEL_ID,
@@ -29,14 +33,6 @@ class NemotronRealTimePipeline:
         self.model.eval()
         self.processor.set_streaming_mode("ultra_low_latency")
         print(f"Model ready. Buffer latency: {self.processor.streaming_latency_ms} ms")
-
-
-    def audio_callback(self, indata, frames, time_info, status):
-        """Capture mono PCM from the microphone."""
-        if status:
-            print(status)
-
-        self.audio_queue.put(indata[:, 0].copy())
 
 
     def run_loop(self):
@@ -51,41 +47,39 @@ class NemotronRealTimePipeline:
         frames_done = 0
         open_segments = {}      # speaker -> start time of a segment still running
 
-        with sd.InputStream(samplerate=self.sample_rate, channels=1, dtype="float32",
-                            callback=self.audio_callback, blocksize=1600):
+        while True:
+            block = self.input_audio_queue.get()
+            buffer = np.concatenate((buffer, block))
+            total += len(block)
+
             while True:
-                block = self.audio_queue.get()
-                buffer = np.concatenate((buffer, block))
-                total += len(block)
+                first = mel_frame_idx is None
+                if first:
+                    start, end = 0, p.num_samples_first_audio_chunk
+                else:
+                    start = p.audio_chunk_start(mel_frame_idx)
+                    end = start + p.num_samples_per_audio_chunk
+                if total < end:
+                    break   # not enough audio yet
 
-                while True:
-                    first = mel_frame_idx is None
-                    if first:
-                        start, end = 0, p.num_samples_first_audio_chunk
-                    else:
-                        start = p.audio_chunk_start(mel_frame_idx)
-                        end = start + p.num_samples_per_audio_chunk
-                    if total < end:
-                        break   # not enough audio yet
+                chunk = buffer[start - buffer_start : end - buffer_start]
+                inputs = p(chunk, sampling_rate=self.sample_rate,
+                        is_streaming=True, is_first_audio_chunk=first)
+                inputs = inputs.to(self.model.device, dtype=self.model.dtype)
+                with torch.inference_mode():
+                    outputs = self.model(**inputs, speaker_cache=speaker_cache)
+                speaker_cache = outputs.speaker_cache
 
-                    chunk = buffer[start - buffer_start : end - buffer_start]
-                    inputs = p(chunk, sampling_rate=self.sample_rate,
-                            is_streaming=True, is_first_audio_chunk=first)
-                    inputs = inputs.to(self.model.device, dtype=self.model.dtype)
-                    with torch.inference_mode():
-                        outputs = self.model(**inputs, speaker_cache=speaker_cache)
-                    speaker_cache = outputs.speaker_cache
+                logits = outputs.logits.cpu()
+                self.logits_to_segment_events(logits, frames_done, open_segments)
+                frames_done += logits.shape[1]
 
-                    logits = outputs.logits.cpu()
-                    self.logits_to_segment_events(logits, frames_done, open_segments)
-                    frames_done += logits.shape[1]
+                step = p.num_mel_frames_per_step
+                mel_frame_idx = step if first else mel_frame_idx + step
 
-                    step = p.num_mel_frames_per_step
-                    mel_frame_idx = step if first else mel_frame_idx + step
-
-                    next_start = p.audio_chunk_start(mel_frame_idx)   # drop audio nobody needs again
-                    buffer = buffer[next_start - buffer_start:]
-                    buffer_start = next_start
+                next_start = p.audio_chunk_start(mel_frame_idx)   # drop audio nobody needs again
+                buffer = buffer[next_start - buffer_start:]
+                buffer_start = next_start
 
     def logits_to_segment_events(self, logits, frames_done, open_segments):
         """Converting state into emitted raw events."""
@@ -119,4 +113,4 @@ class NemotronRealTimePipeline:
     
     def publish_segment_event(self, event: SpeakerSegmentEvent):
         """Converts events as dictionaries and push to output queue for main process."""
-        self.segment_output_queue.put(event.as_dict())
+        self.output_event_queue.put(event.as_dict())
