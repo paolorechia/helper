@@ -1,7 +1,7 @@
 import multiprocessing as mp
-import queue
 
 from lib.audio_pipeline import AudioPipeline, AudioPipelineConfig
+from lib.event_aggregation_pipeline import EventAggregationPipeline
 from lib.moonshine_pipeline import MoonshineRealTimePipeline
 from lib.nemotron_pipeline import NemotronRealTimePipeline
 
@@ -38,24 +38,24 @@ if __name__ == "__main__":
             event_queue,
         ),
     )
+    event_aggregation_process = mp.Process(
+        target=EventAggregationPipeline.start_event_aggregation, args=(event_queue,)
+    )
     created_processes = [
         ("audio_pipeline", audio_pipeline_process),
         ("nemotron", nemotron_process),
         ("moonshine", moonshine_process),
+        ("event_aggregation", event_aggregation_process),
     ]
 
     # Start processes
     for name, p in created_processes:
         p.start()
 
-    while True:
+    # TODO: implement stop event handling
+    keep_running = True
+    while keep_running:
         for p_name, p in created_processes:
             if not p.is_alive():
                 print(f"process {p} died")
-                break
-
-        try:
-            event = event_queue.get(timeout=1)
-            print("Got event: ", event)
-        except queue.Empty:
-            pass
+                keep_running = False
