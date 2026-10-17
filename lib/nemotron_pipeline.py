@@ -1,13 +1,14 @@
 import queue
+
 import numpy as np
 import torch
-
 from transformers import (
     AutoModelForAudioFrameClassification,
     AutoProcessor,
 )
+
 from lib.audio_pipeline import AudioPipelineConfig
-from lib.segments import SpeakerSegmentState, SpeakerSegmentEvent
+from lib.segments import SpeakerSegmentEvent, SpeakerSegmentState
 
 MODEL_ID = "nvidia/Nemotron-3-Diarization"
 FRAME_S = 0.01

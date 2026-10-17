@@ -1,8 +1,8 @@
 import queue
-import sounddevice as sd
 import time
-
 from dataclasses import dataclass
+
+import sounddevice as sd
 
 DEFAULT_SAMPLE_RATE = 16_000
 DEFAULT_BLOCK_SIZE = 1600
@@ -43,8 +43,8 @@ class AudioPipeline:
     def audio_callback(self, indata, frames, time_info, status):
         """Capture mono PCM from the microphone."""
 
-        for queue in self.audio_queues:
-            queue.put(indata[:, 0].copy())
+        for q in self.audio_queues:
+            q.put(indata[:, 0].copy())
 
     @classmethod
     def start_audio_pipeline(

@@ -1,11 +1,12 @@
-import numpy as np
-import sounddevice as sd
-from fastapi import FastAPI
-from kokoro import KPipeline
 import uuid
 
-from lib.openrouter import OpenRouterProvider
+import numpy as np
+import sounddevice as sd
+from fastapi import FastAPI, HTTPException
+from kokoro import KPipeline
+
 from lib.chat import Chat
+from lib.openrouter import OpenRouterProvider
 
 SAMPLE_RATE = 24000
 MAX_TOKENS = 150

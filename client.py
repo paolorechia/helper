@@ -4,7 +4,6 @@ import queue
 from lib.audio_pipeline import AudioPipeline, AudioPipelineConfig
 from lib.moonshine_pipeline import MoonshineRealTimePipeline
 from lib.nemotron_pipeline import NemotronRealTimePipeline
-from lib.segments import SpeakerSegmentEvent
 
 if __name__ == "__main__":
     # Create base queues for inter-process communication

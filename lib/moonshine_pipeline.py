@@ -1,12 +1,11 @@
-import queue
-import time
-import numpy as np
 import os
+import queue
 
-from moonshine_voice import Transcriber, TranscriptEventListener, ModelArch
+import numpy as np
+from moonshine_voice import ModelArch, Transcriber, TranscriptEventListener
 
-from lib.segments import ASRSegmentEvent
 from lib.audio_pipeline import AudioPipelineConfig
+from lib.segments import ASRSegmentEvent
 
 
 class MoonshineRealTimePipeline:

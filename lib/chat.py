@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from enum import StrEnum, auto
+from enum import StrEnum
 
 
 class OpenAIRole(StrEnum):

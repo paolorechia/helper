@@ -1,6 +1,7 @@
 """OpenRouter's chat-completions API, using the existing HTTP dependency."""
 
 import os
+
 import httpx
 
 
@@ -52,5 +53,5 @@ class OpenRouterProvider:
         payload = response.json()
         text = payload["choices"][0]["message"]["content"]
         if not text:
-            raise Exception(f"Empty text in {payload}")
+            raise ValueError(f"Empty text in {payload}")
         return text
