@@ -114,3 +114,19 @@ class NemotronRealTimePipeline:
     def publish_segment_event(self, event: SpeakerSegmentEvent):
         """Converts events as dictionaries and push to output queue for main process."""
         self.output_event_queue.put(event.as_dict())
+
+
+    @classmethod
+    def start_nemotron(
+        cls,
+        input_audio_queue: queue.Queue,
+        audio_pipeline_config: AudioPipelineConfig,
+        output_event_queue: queue.Queue
+    ):
+        """Starts Diarization pipeline."""
+        NemotronRealTimePipeline(
+            input_audio_queue=input_audio_queue,
+            audio_pipeline_config=audio_pipeline_config,
+            output_event_queue=output_event_queue
+        ).run_loop()
+        

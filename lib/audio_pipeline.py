@@ -45,3 +45,15 @@ class AudioPipeline:
         for queue in self.audio_queues:
             queue.put(indata[:, 0].copy())
 
+
+    @classmethod
+    def start_audio_pipeline(
+        cls,
+        audio_queues: list[queue.Queue],
+        audio_pipeline_config: AudioPipelineConfig
+    ):
+        """Starts base audio pipeline to capture microphone audio."""
+        AudioPipeline(
+            config=audio_pipeline_config,
+            audio_queues=audio_queues
+        ).run_loop()

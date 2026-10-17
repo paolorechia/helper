@@ -53,6 +53,21 @@ class MoonshineRealTimePipeline:
         finally:
             self.transcriber.stop()
 
+    @classmethod
+    def start_moonshine(
+        cls,
+        input_audio_queue: queue.Queue,
+        audio_pipeline_config: AudioPipelineConfig,
+        output_event_queue: queue.Queue
+    ):
+        """Starts ASR pipeline."""
+        MoonshineRealTimePipeline(
+            input_audio_queue=input_audio_queue,
+            audio_pipeline_config=audio_pipeline_config,
+            output_event_queue=output_event_queue
+        ).run_loop()
+
+
 
 class ASRListener(TranscriptEventListener):
     def __init__(self, output_event_queue: queue.Queue):
