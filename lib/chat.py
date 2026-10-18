@@ -37,5 +37,4 @@ class Chat:
         chat_text = []
         for message in self.messages:
             chat_text.append(message.as_dict())
-        # print(f"Generated prompt: {chat_text}")
         return chat_text

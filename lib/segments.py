@@ -12,11 +12,7 @@ class EventType(StrEnum):
     abstract = "abstract"
     asr_segment = "asr_segment"
     diarization_segment = "diarization_segment"
-
-
-@dataclass
-class Event:
-    type_ = "Abstract"
+    aggregated_segment = "aggregated_segment"
 
 
 @dataclass
@@ -41,6 +37,10 @@ class SpeakerSegmentEvent:
         if "state" not in d:
             d["state"] = "unknown"
 
+        # ignore type_
+        if "type_" in d:
+            d.pop("type_")
+
         lower_case = {k.lower(): v for k, v in d.items()}
         return SpeakerSegmentEvent(**lower_case)
 
@@ -63,4 +63,79 @@ class ASRSegmentEvent:
     @classmethod
     def from_dict(cls, d: dict) -> "ASRSegmentEvent":
         lower_case = {k.lower(): v for k, v in d.items()}
+
+        # ignore type_
+        if "type_" in d:
+            d.pop("type_")
+
         return ASRSegmentEvent(**lower_case)
+
+    def overlaps(self, segment: SpeakerSegmentEvent) -> (float, bool):
+        overlaps = False
+        overlap_area = -1
+
+        # case 1, self is inside segment
+        if self.start > segment.start and self.end < segment.end:
+            overlaps = True
+            overlap_area = self.end - self.start
+
+        # case 2, segment is inside self
+        if segment.start > self.start and segment.end < self.end:
+            overlaps = True
+            overlap_area = segment.end - segment.start
+
+        # case 3, partial overlap, self is on left isde
+        # e1 > s2 and e2 > s1
+        if self.end > segment.start and segment.end > self.start:
+            overlaps = True
+            overlap_area = self.end - segment.start
+
+        # case 4, partial overlap, self is on right isde
+        # e2 > s1 and e1 > s2
+        if segment.end > self.start and self.end > segment.start:
+            overlaps = True
+            overlap_area = segment.end - self.start
+
+        return overlap_area, overlaps
+
+
+@dataclass
+class AggregatedSegmentEvent:
+    start: float
+    end: float
+    text: str
+    speaker: str
+    type_ = EventType.aggregated_segment  # Internal, don't override
+
+    def as_dict(self) -> dict:
+        return {
+            "start": self.start,
+            "end": self.end,
+            "text": self.text,
+            "speaker": self.speaker,
+            "type_": self.type_,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "AggregatedSegmentEvent":
+        lower_case = {k.lower(): v for k, v in d.items()}
+
+        # ignore type_
+        if "type_" in d:
+            d.pop("type_")
+
+        return AggregatedSegmentEvent(**lower_case)
+
+    @classmethod
+    def from_events(
+        cls,
+        asr_segment_event: ASRSegmentEvent,
+        speaker_segment_event: SpeakerSegmentEvent,
+    ) -> "AggregatedSegmentEvent":
+        # Read only speaker from speaker segment, use timestamps from ASR Segmente Event as source of truth
+        return AggregatedSegmentEvent(
+            start=asr_segment_event.start,
+            end=asr_segment_event.end,
+            text=asr_segment_event.text,
+            speaker=speaker_segment_event.speaker,
+        )
