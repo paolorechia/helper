@@ -35,7 +35,7 @@ class EventAggregationPipeline:
                 self.aggregate_events()
 
             # If we aggregated events, publish them
-            if len(self.aggregated_events) > 1:
+            if len(self.aggregated_events) >= 1:
                 self.publish_aggregated_events()
 
                 # For now clear in a Naive away
