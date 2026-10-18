@@ -1,5 +1,6 @@
 import multiprocessing as mp
 
+from lib.api_pipeline import ApiPipeline
 from lib.audio_pipeline import AudioPipeline, AudioPipelineConfig
 from lib.event_aggregation_pipeline import EventAggregationPipeline
 from lib.moonshine_pipeline import MoonshineRealTimePipeline
@@ -46,11 +47,15 @@ if __name__ == "__main__":
             aggregated_event_queue,
         ),
     )
+    api_process = mp.Process(
+        target=ApiPipeline.start_api_sync, args=(aggregated_event_queue,)
+    )
     created_processes = [
         ("audio_pipeline", audio_pipeline_process),
         ("nemotron", nemotron_process),
         ("moonshine", moonshine_process),
         ("event_aggregation", event_aggregation_process),
+        ("api_process", api_process),
     ]
 
     # Start processes

@@ -8,6 +8,7 @@ from kokoro import KPipeline
 from lib.chat import Chat
 from lib.openrouter import OpenRouterProvider
 
+AGENT_SPEAKER = 1
 SAMPLE_RATE = 24000
 MAX_TOKENS = 150
 TIMEOUT = 5
@@ -57,6 +58,15 @@ global_chat.add_system_instruction(DEFAULT_PROMPT)
 @app.post("/")
 async def root(body: dict):
     if transcription := body.get("data", {}).get("transcription", None):
+        speaker = body.get("data", {}).get("speaker", None)
+        if speaker is None:
+            raise HTTPException(status_code=400, detail="Speaker is missing")
+
+        if speaker == AGENT_SPEAKER:
+            raise HTTPException(
+                status_code=400, detail="Ignoring loop: speaker is agent"
+            )
+
         global_chat.add_user_message(transcription)
         messages = global_chat.to_openai_prompt()
         print("Calling open router...")

@@ -8,8 +8,9 @@ class ApiConfig:
     hostname: str = "http://127.0.0.1"
     port: int = 8000
 
+    @property
     def as_url(self) -> str:
-        return f"{self.hostname:self.port}"
+        return f"{self.hostname}:{self.port}"
 
 
 class AgentAPI:
@@ -17,7 +18,8 @@ class AgentAPI:
         self.config = config
 
     def api_call(self, text, speaker):
-        requests.post(
+        print(f"Sending [speaker {speaker}]: {text}")
+        response = requests.post(
             self.config.as_url,
             json={
                 "data": {
@@ -26,3 +28,5 @@ class AgentAPI:
                 }
             },
         )
+        print(f"Response Status Code: {response.status_code}")
+        print(f"Response Text: {response.text}")
