@@ -35,7 +35,7 @@ class EventAggregationPipeline:
                 self.aggregate_events()
 
             # If we aggregated events, publish them
-            if self.aggregate_events > 1:
+            if len(self.aggregated_events) > 1:
                 self.publish_aggregated_events()
 
                 # For now clear in a Naive away
@@ -72,7 +72,8 @@ class EventAggregationPipeline:
 
     def publish_aggregated_events(self):
         """Publishes aggregated events into next event bus."""
-        for aggregated_event in self.aggregate_events:
+        for aggregated_event in self.aggregated_events:
+            print("Publishing aggregated event: ", aggregated_event)
             self.aggregated_event_queue.put(aggregated_event.as_dict())
 
     def clear_aggregation_state(self):
@@ -112,5 +113,7 @@ class EventAggregationPipeline:
                 )
 
     @classmethod
-    def start_event_aggregation(cls, input_event_queue: queue.Queue):
-        EventAggregationPipeline(input_event_queue).run_loop()
+    def start_event_aggregation(
+        cls, input_event_queue: queue.Queue, output_event_queue: queue.Queue
+    ):
+        EventAggregationPipeline(input_event_queue, output_event_queue).run_loop()

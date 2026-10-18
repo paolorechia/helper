@@ -70,33 +70,39 @@ class ASRSegmentEvent:
 
         return ASRSegmentEvent(**lower_case)
 
-    def overlaps(self, segment: SpeakerSegmentEvent) -> (float, bool):
-        overlaps = False
+    def overlaps(self, segment: SpeakerSegmentEvent) -> float:
+        if segment.state != SpeakerSegmentState.closed:
+            raise ValueError("Cannot compute overlap on segment that is not closed")
+
         overlap_area = -1
 
         # case 1, self is inside segment
         if self.start > segment.start and self.end < segment.end:
-            overlaps = True
             overlap_area = self.end - self.start
+            return overlap_area
 
         # case 2, segment is inside self
         if segment.start > self.start and segment.end < self.end:
-            overlaps = True
             overlap_area = segment.end - segment.start
+            return overlap_area
 
-        # case 3, partial overlap, self is on left isde
+        # case 3, partial overlap, self is on left side
         # e1 > s2 and e2 > s1
-        if self.end > segment.start and segment.end > self.start:
-            overlaps = True
+        if (
+            self.end > segment.start
+            and segment.end > self.start
+            and self.end < segment.end
+        ):
             overlap_area = self.end - segment.start
+            return overlap_area
 
-        # case 4, partial overlap, self is on right isde
+        # case 4, partial overlap, self is on right side
         # e2 > s1 and e1 > s2
         if segment.end > self.start and self.end > segment.start:
-            overlaps = True
             overlap_area = segment.end - self.start
+            return overlap_area
 
-        return overlap_area, overlaps
+        return overlap_area
 
 
 @dataclass

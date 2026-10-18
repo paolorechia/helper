@@ -10,6 +10,7 @@ if __name__ == "__main__":
     mp.set_start_method("spawn")
 
     event_queue = mp.Queue()
+    aggregated_event_queue = mp.Queue()
     nemotron_audio_queue = mp.Queue()
     moonshine_audio_queue = mp.Queue()
 
@@ -39,7 +40,11 @@ if __name__ == "__main__":
         ),
     )
     event_aggregation_process = mp.Process(
-        target=EventAggregationPipeline.start_event_aggregation, args=(event_queue,)
+        target=EventAggregationPipeline.start_event_aggregation,
+        args=(
+            event_queue,
+            aggregated_event_queue,
+        ),
     )
     created_processes = [
         ("audio_pipeline", audio_pipeline_process),
