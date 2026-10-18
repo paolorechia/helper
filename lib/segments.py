@@ -65,8 +65,8 @@ class ASRSegmentEvent:
         lower_case = {k.lower(): v for k, v in d.items()}
 
         # ignore type_
-        if "type_" in d:
-            d.pop("type_")
+        if "type_" in lower_case:
+            lower_case.pop("type_")
 
         return ASRSegmentEvent(**lower_case)
 
@@ -127,8 +127,8 @@ class AggregatedSegmentEvent:
         lower_case = {k.lower(): v for k, v in d.items()}
 
         # ignore type_
-        if "type_" in d:
-            d.pop("type_")
+        if "type_" in lower_case:
+            lower_case.pop("type_")
 
         return AggregatedSegmentEvent(**lower_case)
 

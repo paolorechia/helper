@@ -1,5 +1,8 @@
+import queue
+
 import pytest
 
+from lib.event_aggregation_pipeline import EventAggregationPipeline
 from lib.segments import (
     ASRSegmentEvent,
     SpeakerSegmentEvent,
@@ -31,8 +34,42 @@ def test_segment_overlap(s1, e1, s2, e2, expected_overlap_area):
     assert abs(overlap_area - expected_overlap_area) < 0.1
 
 
-# def test_event_aggregation_pipeline():
-#     input_event_queue = queue.Queue()
-#     aggregated_event_queue = queue.Queue()
+def test_event_aggregation_pipeline():
+    input_event_queue = queue.Queue()
+    aggregated_event_queue = queue.Queue()
 
-#     event_aggregation_pipeline = EventAggregationPipeline(input_event_queue, aggregated_event_queue)
+    input_event_queue.put(ASRSegmentEvent(start=0.1, end=1.0, text="bah").as_dict())
+    input_event_queue.put(
+        SpeakerSegmentEvent(
+            start=0.5,
+            end=0.9,
+            speaker="alice",
+            state=SpeakerSegmentState.closed,
+        ).as_dict()
+    )
+
+    event_aggregation_pipeline = EventAggregationPipeline(
+        input_event_queue, aggregated_event_queue
+    )
+    event_aggregation_pipeline.read_events_from_queue()
+    # Read method reads all available events
+    assert input_event_queue.empty() is True
+
+    assert len(event_aggregation_pipeline.active_asr_segments) == 1
+    assert len(event_aggregation_pipeline.active_diarization_segments) == 1
+
+    event_aggregation_pipeline.aggregate_events()
+    assert len(event_aggregation_pipeline.aggregated_events) == 1
+
+    event_aggregation_pipeline.publish_aggregated_events()
+
+    aggregated_event = aggregated_event_queue.get(timeout=0.1)
+
+    assert aggregated_event["start"] == 0.1
+    assert aggregated_event["end"] == 1.0
+    assert aggregated_event_queue.empty() is True
+
+    event_aggregation_pipeline.clear_aggregation_state()
+    assert len(event_aggregation_pipeline.aggregated_events) == 0
+    assert len(event_aggregation_pipeline.active_asr_segments) == 0
+    assert len(event_aggregation_pipeline.active_diarization_segments) == 0

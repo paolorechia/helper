@@ -59,11 +59,9 @@ class EventAggregationPipeline:
         try:
             while event := self.input_event_queue.get(timeout=self.queue_timeout):
                 if event["type_"] == EventType.asr_segment:
-                    self.event_aggregation_state.active_asr_segments.append(
-                        ASRSegmentEvent.from_dict(event)
-                    )
+                    self.active_asr_segments.append(ASRSegmentEvent.from_dict(event))
                 elif event["type_"] == EventType.diarization_segment:
-                    self.event_aggregation_state.active_diarization_segments.append(
+                    self.active_diarization_segments.append(
                         SpeakerSegmentEvent.from_dict(event)
                     )
                 print("Got event: ", event)
