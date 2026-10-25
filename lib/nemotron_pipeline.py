@@ -1,3 +1,5 @@
+"""Real-time speaker diarization pipeline built on NVIDIA Nemotron-3-Diarization."""
+
 import queue
 
 import numpy as np
@@ -16,6 +18,12 @@ EPS = 1e-3
 
 
 class NemotronRealTimePipeline:
+    """Streams microphone blocks through the diarizer and emits speaker segment events.
+
+    Runs in ultra-low-latency streaming mode, carrying the model's speaker
+    cache across chunks so speakers stay consistent over time.
+    """
+
     def __init__(
         self,
         input_audio_queue: queue.Queue,
@@ -122,6 +130,7 @@ class NemotronRealTimePipeline:
             )
 
     def emit(self, state, speaker, start, end=None):
+        """Publish a speaker segment event with the given state and timestamps."""
         self.publish_segment_event(SpeakerSegmentEvent(state, speaker, start, end))
 
     def publish_segment_event(self, event: SpeakerSegmentEvent):

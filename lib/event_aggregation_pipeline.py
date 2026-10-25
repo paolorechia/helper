@@ -1,3 +1,5 @@
+"""Joins ASR segments with diarization segments into speaker-attributed events."""
+
 import queue
 
 from lib.segments import (
@@ -10,6 +12,8 @@ from lib.segments import (
 
 
 class EventAggregationPipeline:
+    """Attributes each transcribed segment to the speaker it overlaps most with."""
+
     def __init__(
         self, input_event_queue: queue.Queue, aggregated_event_queue: queue.Queue
     ):
@@ -23,6 +27,7 @@ class EventAggregationPipeline:
         self.aggregated_events: list[AggregatedSegmentEvent] = []
 
     def run_loop(self):
+        """Continuously read, aggregate, and publish events."""
         while True:
             # Always
             self.read_events_from_queue()
@@ -114,4 +119,5 @@ class EventAggregationPipeline:
     def start_event_aggregation(
         cls, input_event_queue: queue.Queue, output_event_queue: queue.Queue
     ):
+        """Entrypoint for running the pipeline in a dedicated process."""
         EventAggregationPipeline(input_event_queue, output_event_queue).run_loop()

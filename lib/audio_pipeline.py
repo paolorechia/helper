@@ -1,3 +1,5 @@
+"""Microphone capture pipeline that fans raw PCM blocks out to downstream queues."""
+
 import queue
 import time
 from dataclasses import dataclass
@@ -12,6 +14,8 @@ DEFAULT_CHANNELS = 1
 
 @dataclass
 class AudioPipelineConfig:
+    """Capture settings shared by all audio pipelines."""
+
     sample_rate = DEFAULT_SAMPLE_RATE
     channels = DEFAULT_CHANNELS
     dtype = DEFAULT_DTYPE
@@ -26,6 +30,7 @@ class AudioPipeline:
         self.audio_queues = audio_queues
 
     def run_loop(self):
+        """Stream microphone audio into the registered queues until interrupted."""
         try:
             with sd.InputStream(
                 samplerate=self.config.sample_rate,

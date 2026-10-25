@@ -1,3 +1,10 @@
+"""Voice assistant server: receives transcriptions, replies via an LLM, speaks the reply.
+
+Exposes a FastAPI endpoint that the client pipelines POST aggregated
+transcription events to. The reply is generated through OpenRouter and
+synthesized to audio with Kokoro, played back locally.
+"""
+
 import uuid
 
 import numpy as np
@@ -57,6 +64,12 @@ global_chat.add_system_instruction(DEFAULT_PROMPT)
 
 @app.post("/")
 async def root(body: dict):
+    """Handle an aggregated transcription event and speak the assistant's reply.
+
+    Ignores events produced by the agent itself (to avoid feedback loops),
+    appends the transcription to the chat history, generates a reply, and
+    plays it back as audio. Returns the full chat history.
+    """
     if transcription := body.get("data", {}).get("transcription", None):
         speaker = body.get("data", {}).get("speaker", None)
         if speaker is None:

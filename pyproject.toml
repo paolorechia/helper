@@ -33,3 +33,11 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.17.1",
 ]
+
+[tool.uv]
+# Resolve Python from the pyenv shims rather than uv's own managed downloads.
+python-preference = "only-system"
+python-downloads = "never"
+# Use the OS trust store (patched for the eMudhra/emSign CA incident) in
+# addition to uv's bundled roots.
+system-certs = true

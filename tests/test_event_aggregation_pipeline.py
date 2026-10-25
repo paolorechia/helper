@@ -1,3 +1,5 @@
+"""Tests for segment overlap math and the event aggregation pipeline."""
+
 import queue
 
 import pytest

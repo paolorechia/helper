@@ -1,3 +1,5 @@
+"""Real-time speech-to-text pipeline built on the Moonshine streaming transcriber."""
+
 import os
 import queue
 
@@ -9,6 +11,12 @@ from lib.segments import ASRSegmentEvent
 
 
 class MoonshineRealTimePipeline:
+    """Streams microphone blocks through Moonshine and emits ASR segment events.
+
+    Requires the MOONSHINE_MODEL_PATH environment variable to point at a
+    downloaded Moonshine model (see README). Only float32 audio is supported.
+    """
+
     def __init__(
         self,
         input_audio_queue: queue.Queue,
@@ -34,6 +42,7 @@ class MoonshineRealTimePipeline:
         self.transcriber.add_listener(ASRListener(self.output_event_queue))
 
     def run_loop(self):
+        """Feed queued audio blocks into the transcriber until the process exits."""
         self.transcriber.start()
         print("Moonshine Ready")
         print("*" * 50)
@@ -63,11 +72,14 @@ class MoonshineRealTimePipeline:
 
 
 class ASRListener(TranscriptEventListener):
+    """Converts completed Moonshine transcript lines into ASRSegmentEvents."""
+
     def __init__(self, output_event_queue: queue.Queue):
         super().__init__()
         self.output_event_queue = output_event_queue
 
     def on_line_completed(self, event):
+        """Publish an ASRSegmentEvent for each finalized transcript line."""
         line = event.line
 
         event = ASRSegmentEvent(

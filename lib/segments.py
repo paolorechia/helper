@@ -1,14 +1,24 @@
+"""Event types exchanged between the audio, ASR, diarization, and aggregation stages.
+
+All events serialize to plain dicts so they can cross multiprocessing queues.
+Timestamps are in seconds relative to the start of the audio stream.
+"""
+
 from dataclasses import dataclass
 from enum import StrEnum
 
 
 class SpeakerSegmentState(StrEnum):
+    """Lifecycle state of a diarization segment."""
+
     closed = "closed"
     open = "open"
     unknown = "unknown"
 
 
 class EventType(StrEnum):
+    """Discriminator carried in each serialized event dict."""
+
     abstract = "abstract"
     asr_segment = "asr_segment"
     diarization_segment = "diarization_segment"
@@ -17,6 +27,8 @@ class EventType(StrEnum):
 
 @dataclass
 class SpeakerSegmentEvent:
+    """A span of speech attributed to one speaker by the diarizer."""
+
     state: SpeakerSegmentState
     speaker: str
     start: float
@@ -24,6 +36,7 @@ class SpeakerSegmentEvent:
     type_ = EventType.diarization_segment  # Internal, don't override
 
     def as_dict(self) -> dict:
+        """Serialize the event for transport across process queues."""
         return {
             "state": self.state,
             "speaker": self.speaker,
@@ -34,6 +47,7 @@ class SpeakerSegmentEvent:
 
     @classmethod
     def from_dict(cls, d: dict) -> "SpeakerSegmentEvent":
+        """Deserialize an event dict, defaulting a missing state to 'unknown'."""
         if "state" not in d:
             d["state"] = "unknown"
 
@@ -47,12 +61,15 @@ class SpeakerSegmentEvent:
 
 @dataclass
 class ASRSegmentEvent:
+    """A transcribed span of speech, without speaker attribution."""
+
     start: float
     end: float
     text: str
     type_ = EventType.asr_segment  # Internal, don't override
 
     def as_dict(self) -> dict:
+        """Serialize the event for transport across process queues."""
         return {
             "start": self.start,
             "end": self.end,
@@ -62,6 +79,7 @@ class ASRSegmentEvent:
 
     @classmethod
     def from_dict(cls, d: dict) -> "ASRSegmentEvent":
+        """Deserialize an event dict."""
         lower_case = {k.lower(): v for k, v in d.items()}
 
         # ignore type_
@@ -71,6 +89,11 @@ class ASRSegmentEvent:
         return ASRSegmentEvent(**lower_case)
 
     def overlaps(self, segment: SpeakerSegmentEvent) -> float:
+        """Seconds of overlap with a closed diarization segment, or -1 if none.
+
+        Only closed segments have a trustworthy end timestamp, so overlap is
+        undefined for open/unknown segments and raises ValueError.
+        """
         if segment.state != SpeakerSegmentState.closed:
             raise ValueError("Cannot compute overlap on segment that is not closed")
 
@@ -107,6 +130,12 @@ class ASRSegmentEvent:
 
 @dataclass
 class AggregatedSegmentEvent:
+    """A transcribed span of speech with its attributed speaker.
+
+    Timestamps and text come from the ASR segment; the speaker comes from the
+    diarization segment it overlapped most with.
+    """
+
     start: float
     end: float
     text: str
@@ -114,6 +143,7 @@ class AggregatedSegmentEvent:
     type_ = EventType.aggregated_segment  # Internal, don't override
 
     def as_dict(self) -> dict:
+        """Serialize the event for transport across process queues."""
         return {
             "start": self.start,
             "end": self.end,
@@ -124,6 +154,7 @@ class AggregatedSegmentEvent:
 
     @classmethod
     def from_dict(cls, d: dict) -> "AggregatedSegmentEvent":
+        """Deserialize an event dict."""
         lower_case = {k.lower(): v for k, v in d.items()}
 
         # ignore type_
@@ -138,6 +169,7 @@ class AggregatedSegmentEvent:
         asr_segment_event: ASRSegmentEvent,
         speaker_segment_event: SpeakerSegmentEvent,
     ) -> "AggregatedSegmentEvent":
+        """Combine an ASR segment with the diarization segment it overlaps most."""
         # Read only speaker from speaker segment, use timestamps from ASR Segmente Event as source of truth
         return AggregatedSegmentEvent(
             start=asr_segment_event.start,

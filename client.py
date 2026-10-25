@@ -1,3 +1,10 @@
+"""Client entrypoint: wires the real-time audio pipelines together as processes.
+
+Spawns one process per stage — microphone capture, diarization (Nemotron),
+ASR (Moonshine), event aggregation, and the API sink that forwards
+aggregated transcription events to the server in `main.py`.
+"""
+
 import multiprocessing as mp
 
 from lib.api_pipeline import ApiPipeline

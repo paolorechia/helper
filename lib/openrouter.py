@@ -6,6 +6,8 @@ import httpx
 
 
 class OpenRouterProvider:
+    """Calls an OpenRouter chat model with a messages list and returns the reply text."""
+
     def __init__(self, model: str, max_tokens: int, timeout: float):
         self.model = model
         self.max_tokens = max_tokens
@@ -16,6 +18,11 @@ class OpenRouterProvider:
         messages_prompt: list,
         session_id: str,
     ) -> str:
+        """Generate one completion for the given messages.
+
+        Raises ValueError if OPENROUTER_API_KEY is unset, the request fails,
+        or the response contains no text.
+        """
         api_key = os.environ.get("OPENROUTER_API_KEY")
         if not api_key:
             raise ValueError(
