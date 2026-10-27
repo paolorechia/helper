@@ -1,0 +1,2 @@
+<bash-stdout>Resolved 289 packages in 10ms
+Checked 266 packages in 41ms</bash-stdout><bash-stderr></bash-stderr>
