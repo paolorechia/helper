@@ -1,0 +1,1 @@
+How do skills get auto picked up in Claude code? Can I do that somehow for @.claude/skills/uv-workflow.md ?
