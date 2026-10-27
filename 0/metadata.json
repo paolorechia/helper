@@ -1,0 +1,68 @@
+{
+  "cli_version": "0.12.2",
+  "checkpoint_id": "01M5YRMXH76M7GVMQHVY0ZKTDD",
+  "session_id": "bf7caa5f-6323-438c-9ea2-650cd514312a",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-27T13:26:29.951814Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "save_step_count": 1,
+  "files_touched": [
+    "README.md",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "agent": "Claude Code",
+  "model": "minimax-m3",
+  "turn_id": "0b6b9526d8f1",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 63943,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 2109815,
+    "output_tokens": 18515,
+    "api_call_count": 45
+  },
+  "redaction": {
+    "replacements": 3,
+    "layers": {
+      "betterleaks": 0,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 3,
+      "credentialed_uri": 0,
+      "entropy": 0,
+      "key_context": 0,
+      "provider_token": 0,
+      "shell_stdin": 0
+    }
+  },
+  "skill_events_version": 1,
+  "skill_events": [
+    {
+      "id": "prompt-skill-claude-code-find-skills-2026-10-27T13:25:23.73436Z",
+      "event_type": "prompt_invocation",
+      "skill": {
+        "name": "find-skills"
+      },
+      "source": {
+        "agent": "claude-code",
+        "signal": "prompt_slash_command",
+        "confidence": "explicit"
+      },
+      "turn_id": "908e15a8c0cb",
+      "timestamp": "2026-10-27T13:25:23.73436Z",
+      "native": {
+        "command": "/find-skills"
+      },
+      "collapse": {
+        "target": "user_message",
+        "label": "/find-skills",
+        "default_collapsed": true
+      }
+    }
+  ],
+  "session_metrics": {
+    "turn_count": 1
+  }
+}
