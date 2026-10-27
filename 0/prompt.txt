@@ -1,0 +1,1 @@
+Help me write a skill for this repo, which uses uv
