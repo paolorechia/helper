@@ -1,0 +1,17 @@
+Let's update the README to reflect what the codebase really is doing
+
+---
+
+/find-skills
+
+---
+
+git add commit push
+
+---
+
+How can we use this ? https://entire.com/gh/paolorechia/-/trails/1
+
+---
+
+Let's try to build a skill out of this that I can call
