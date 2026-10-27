@@ -1,0 +1,1 @@
+I want longer contexts, so I can build a harness as well that spins up multiple agents (e.g., coding agents, web search etc)
