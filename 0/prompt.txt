@@ -1,0 +1,1 @@
+Check which models my ollama have that run locally
