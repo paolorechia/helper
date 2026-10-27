@@ -46,11 +46,7 @@ class AudioPipeline:
             print("Stopping recording.")
 
     def audio_callback(self, indata, _frames, _time_info, _status):
-        """Capture mono PCM from the microphone.
-
-        sounddevice calls this positionally with a fixed signature, so the
-        arguments we do not use are named with a leading underscore.
-        """
+        """Capture mono PCM from the microphone."""
 
         for q in self.audio_queues:
             q.put(indata[:, 0].copy())

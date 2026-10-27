@@ -1,16 +1,16 @@
 # Known dependency advisories in this repository, one ID per line.
 #
-# These are pre-existing advisories in the transitive ML dependency tree
-# (pillow, nemo-toolkit, filelock, pytorch-lightning and others). They are
-# baselined rather than fixed because none of them are reachable from this
-# project's code paths, and the fixes either do not exist yet or require
-# versions outside the pinned ranges.
+# These are pre-existing advisories in the transitive dependency tree
+# (pillow, filelock, gitpython and others). They are baselined, not triaged:
+# no reachability analysis has been done, so this list records "these exist
+# today", not "these are safe".
 #
 # CI runs 'uv audit' with every ID below ignored, so the job passes today
 # and fails the moment a NEW advisory appears. To refresh the baseline
 # after a dependency bump, run scripts/update-audit-baseline.sh.
 #
-# Do not add an ID here without checking reachability from this repo.
+# Check whether an advisory is reachable from this project's code before
+# adding its ID here. The list should shrink over time, not grow.
 GHSA-22hg-r758-rrw9
 GHSA-24rc-8hj2-v98c
 GHSA-254f-3936-288h
@@ -56,16 +56,6 @@ GHSA-vx6w-vv9f-6gvg
 GHSA-w889-685w-c8fh
 GHSA-xgh8-jp6q-p5x8
 GHSA-xvh5-g6gv-559v
-PYSEC-2026-2672
-PYSEC-2026-2673
-PYSEC-2026-2674
-PYSEC-2026-2675
-PYSEC-2026-3043
-PYSEC-2026-3740
-PYSEC-2026-3850
-PYSEC-2026-3967
-PYSEC-2026-3970
-PYSEC-2026-4221
 PYSEC-2026-4326
 PYSEC-2026-4327
 PYSEC-2026-4328

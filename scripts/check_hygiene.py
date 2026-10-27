@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Repository hygiene checks.
 
-Deliberately dependency-free so it can run in CI before anything is
-installed, and so it does not pull external hook code into the developer's
-machine the way a third-party pre-commit hook would.
-
 Checks every text file tracked by git for:
   - trailing whitespace
   - a missing or duplicated final newline
   - leftover merge conflict markers
   - tabs used for indentation in Python files
+
+Standard library only, so it runs in CI before anything is installed, and
+as a local pre-commit hook it needs no network round trip.
 """
 
 from __future__ import annotations
@@ -67,6 +66,7 @@ def check_file(path: Path) -> list[str]:
         return []
 
     problems = []
+    check_tabs = path.suffix == ".py"
 
     for number, line in enumerate(text.splitlines(), start=1):
         if line != line.rstrip():
@@ -76,17 +76,14 @@ def check_file(path: Path) -> list[str]:
             if line.startswith(marker):
                 problems.append(f"{path}:{number}: merge conflict marker")
 
+        indent = line[: len(line) - len(line.lstrip())]
+        if check_tabs and "\t" in indent:
+            problems.append(f"{path}:{number}: tab used for indentation")
+
     if text and not text.endswith("\n"):
         problems.append(f"{path}: missing newline at end of file")
     elif text.endswith("\n\n"):
         problems.append(f"{path}: blank line at end of file")
-
-    if path.suffix == ".py":
-        for number, line in enumerate(text.splitlines(), start=1):
-            if line.startswith("\t") or (line[: len(line) - len(line.lstrip())]).count(
-                "\t"
-            ):
-                problems.append(f"{path}:{number}: tab used for indentation")
 
     return problems
 

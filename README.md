@@ -218,13 +218,13 @@ The client-side capture settings live in `AudioPipelineConfig`
 
 ## Quality control
 
-GitHub Actions runs on every push and pull request
+GitHub Actions runs on every pull request and on every push to `main`
 (`.github/workflows/ci.yml`):
 
 | Job | What it enforces |
 | --- | --- |
 | `lint` | `ruff check` and `ruff format --check`, against the rule set in `pyproject.toml`. |
-| `hygiene` | No trailing whitespace, every file ends in a newline, no leftover merge conflict markers. |
+| `hygiene` | No trailing whitespace, every file ends in a newline, no leftover merge conflict markers, no tab indentation in Python. |
 | `test` | `pytest`, with a coverage floor that fails the build if coverage drops below it. |
 | `audit` | `uv audit` against a recorded baseline of known advisories, so a new one fails the build. |
 | `docs` | `markdownlint` over this README. |
@@ -237,19 +237,20 @@ only the standard library and pytest, so CI installs the dev dependency group
 alone and never pulls the multi-gigabyte torch and nemo stack. The `smoke` job
 is what exercises the full dependency set.
 
-**The dependency audit is baselined, not clean.** `uv audit` currently reports
-69 advisories, almost all in the transitive ML tree — 44 in `pillow`, 8 in
-`nemo-toolkit`, 6 in `filelock`, 5 in `pytorch-lightning`. They are listed in
-`qc/audit-baseline.txt` and ignored by CI, so the job passes today and fails
-the moment a new advisory appears. Regenerate the baseline after a dependency
-bump with:
+**The dependency audit is baselined, not clean.** `uv audit` reports advisories
+in the transitive dependency tree — mostly `pillow`, plus `filelock` and
+`gitpython`. Every ID is listed in `qc/audit-baseline.txt` and ignored by CI,
+so the job passes today and fails the moment a new advisory appears. The list
+is baselined, not triaged: no reachability analysis has been done, so it
+records "these exist today", not "these are safe". Regenerate it after a
+dependency bump with:
 
 ```sh
 ./scripts/update-audit-baseline.sh
 ```
 
 Review that diff carefully — every newly added ID is one CI will now accept
-silently.
+silently, and the list should shrink over time rather than grow.
 
 ## Development
 
@@ -257,7 +258,7 @@ silently.
 uv run pytest                    # tests
 uv run ruff check .              # lint
 uv run ruff format .             # format
-uv run pre-commit run --all-files # pre-commit hooks
+uv run pre-commit run --all-files # ruff + file hygiene
 python3 scripts/check_hygiene.py # file hygiene
 ```
 

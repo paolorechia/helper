@@ -14,11 +14,9 @@ dependencies = [
     "kokoro>=0.9.4",
     "matplotlib>=3.11.2",
     "moonshine-voice>=0.1.5",
-    "nemo-toolkit[asr]>=2.0.0",
     "neptune>=1.14.0.post2",
     "numpy>=2.5.4",
     "packaging>=26.3",
-    "pytorch-lightning>=2.0.0,<2.4.0",
     "requests>=2.34.2",
     "setuptools>=84.1.0",
     "sounddevice>=0.5.6",
@@ -78,3 +76,6 @@ select = [
 [tool.ruff.lint.per-file-ignores]
 # Tests take fixtures and parameters that the body does not always use.
 "tests/*" = ["ARG001", "ARG002"]
+# DEFAULT_PROMPT is a verbatim system prompt: its line breaks are part of the
+# text sent to the model, so it must not be re-wrapped to satisfy E501.
+"main.py" = ["E501"]

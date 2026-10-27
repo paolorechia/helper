@@ -7,3 +7,13 @@ repos:
     - id: ruff-check
     # Run the formatter.
     - id: ruff-format
+- repo: local
+  hooks:
+    # The repo's own hygiene checks, so violations are found before a push
+    # rather than in CI. Standard library only: no network, no install.
+    - id: file-hygiene
+      name: File hygiene
+      entry: python3 scripts/check_hygiene.py
+      language: system
+      always_run: true
+      pass_filenames: false
