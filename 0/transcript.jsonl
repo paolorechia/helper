@@ -1,0 +1,2 @@
+{"v":1,"agent":"claude-code","cli_version":"0.12.2","type":"user","ts":"2026-10-25T22:39:54.098Z","content":[{"id":"9e2f6997-35a9-45b8-99e2-ade572bf3f27","text":"hello world"}]}
+{"v":1,"agent":"claude-code","cli_version":"0.12.2","type":"assistant","ts":"2026-10-25T22:39:55.021Z","id":"4b64c9fc-3346-409a-88b7-57ff560ee54e","cache_write_5m_tokens":0,"cache_write_1h_tokens":0,"content":[{"text":"API Error: 400 Upstream request failed: Model is unavailable.","type":"text"}]}
