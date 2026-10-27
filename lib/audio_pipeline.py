@@ -45,7 +45,7 @@ class AudioPipeline:
         except KeyboardInterrupt:
             print("Stopping recording.")
 
-    def audio_callback(self, indata, frames, time_info, status):
+    def audio_callback(self, indata, _frames, _time_info, _status):
         """Capture mono PCM from the microphone."""
 
         for q in self.audio_queues:

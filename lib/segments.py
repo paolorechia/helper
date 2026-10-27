@@ -101,13 +101,11 @@ class ASRSegmentEvent:
 
         # case 1, self is inside segment
         if self.start > segment.start and self.end < segment.end:
-            overlap_area = self.end - self.start
-            return overlap_area
+            return self.end - self.start
 
         # case 2, segment is inside self
         if segment.start > self.start and segment.end < self.end:
-            overlap_area = segment.end - segment.start
-            return overlap_area
+            return segment.end - segment.start
 
         # case 3, partial overlap, self is on left side
         # e1 > s2 and e2 > s1
@@ -116,14 +114,12 @@ class ASRSegmentEvent:
             and segment.end > self.start
             and self.end < segment.end
         ):
-            overlap_area = self.end - segment.start
-            return overlap_area
+            return self.end - segment.start
 
         # case 4, partial overlap, self is on right side
         # e2 > s1 and e1 > s2
         if segment.end > self.start and self.end > segment.start:
-            overlap_area = segment.end - self.start
-            return overlap_area
+            return segment.end - self.start
 
         return overlap_area
 
@@ -170,7 +166,8 @@ class AggregatedSegmentEvent:
         speaker_segment_event: SpeakerSegmentEvent,
     ) -> "AggregatedSegmentEvent":
         """Combine an ASR segment with the diarization segment it overlaps most."""
-        # Read only speaker from speaker segment, use timestamps from ASR Segmente Event as source of truth
+        # Read only the speaker from the speaker segment; use timestamps from
+        # the ASR segment event as the source of truth.
         return AggregatedSegmentEvent(
             start=asr_segment_event.start,
             end=asr_segment_event.end,

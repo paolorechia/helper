@@ -1,4 +1,5 @@
-"""Voice assistant server: receives transcriptions, replies via an LLM, speaks the reply.
+"""Voice assistant server: receives transcriptions, replies via an LLM, and
+speaks the reply.
 
 Exposes a FastAPI endpoint that the client pipelines POST aggregated
 transcription events to. The reply is generated through OpenRouter and

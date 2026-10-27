@@ -14,14 +14,11 @@ dependencies = [
     "kokoro>=0.9.4",
     "matplotlib>=3.11.2",
     "moonshine-voice>=0.1.5",
-    "nemo-toolkit[asr]>=2.0.0",
     "neptune>=1.14.0.post2",
     "numpy>=2.5.4",
     "packaging>=26.3",
-    "pytest-cov>=7.1.0",
-    "pytorch-lightning>=2.0.0,<2.4.0",
     "requests>=2.34.2",
-    "setuptools>=84.0.0",
+    "setuptools>=84.1.0",
     "sounddevice>=0.5.6",
     "torch>=2.14.1",
     "torchaudio>=2.11.0",
@@ -32,6 +29,7 @@ dependencies = [
 dev = [
     "pre-commit>=4.7.0",
     "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
     "ruff>=0.17.1",
 ]
 
@@ -42,3 +40,42 @@ python-downloads = "never"
 # Use the OS trust store (patched for the eMudhra/emSign CA incident) in
 # addition to uv's bundled roots.
 system-certs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=lib --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["lib"]
+branch = true
+
+[tool.coverage.report]
+# Floor rather than a target: it stops coverage silently regressing without
+# demanding the untestable model and audio paths be unit tested.
+fail_under = 30
+show_missing = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # import sorting
+    "B",   # bugbear
+    "UP",  # pyupgrade
+    "SIM", # simplify
+    "C4",  # comprehensions
+    "RET", # return statements
+    "ARG", # unused arguments
+    "PTH", # prefer pathlib
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests take fixtures and parameters that the body does not always use.
+"tests/*" = ["ARG001", "ARG002"]
+# DEFAULT_PROMPT is a verbatim system prompt: its line breaks are part of the
+# text sent to the model, so it must not be re-wrapped to satisfy E501.
+"main.py" = ["E501"]

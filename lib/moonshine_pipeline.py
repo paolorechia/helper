@@ -32,7 +32,8 @@ class MoonshineRealTimePipeline:
 
         if audio_pipeline_config.dtype != "float32":
             raise ValueError(
-                f"Moonshine pipeline does not support this dtype: {audio_pipeline_config.dtype}"
+                "Moonshine pipeline does not support this dtype: "
+                f"{audio_pipeline_config.dtype}"
             )
 
         self.transcriber = Transcriber(

@@ -66,7 +66,7 @@ if __name__ == "__main__":
     ]
 
     # Start processes
-    for name, p in created_processes:
+    for _name, p in created_processes:
         p.start()
 
     # TODO: implement stop event handling
@@ -74,5 +74,5 @@ if __name__ == "__main__":
     while keep_running:
         for p_name, p in created_processes:
             if not p.is_alive():
-                print(f"process {p} died")
+                print(f"process {p_name} died")
                 keep_running = False

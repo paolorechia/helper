@@ -1,4 +1,4 @@
-"""OpenRouter's chat-completions API, using the existing HTTP dependency."""
+"""OpenRouter's chat-completions API, via the existing HTTP dependency."""
 
 import os
 
@@ -6,7 +6,7 @@ import httpx
 
 
 class OpenRouterProvider:
-    """Calls an OpenRouter chat model with a messages list and returns the reply text."""
+    """Calls an OpenRouter chat model and returns the reply text."""
 
     def __init__(self, model: str, max_tokens: int, timeout: float):
         self.model = model

@@ -1,0 +1,14 @@
+{
+  "config": {
+    "MD013": {
+      // Prose is held to the same 88 columns as the Python code, but table
+      // rows and code blocks are exempt: a table cell has to hold whole
+      // sentences, and wrapping them would break the table.
+      "line_length": 88,
+      "tables": false,
+      "code_blocks": false
+    }
+  },
+  "globs": ["README.md", "docs/**/*.md"],
+  "ignores": [".entire/**", ".venv/**"]
+}
