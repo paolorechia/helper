@@ -1,0 +1,1 @@
+Can you research which harnesses have loop implemented? In particular, whether kiro does
