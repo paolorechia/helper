@@ -30,7 +30,7 @@ Two entry points, run in separate processes.
 
 Spawns one process per stage and connects them with multiprocessing queues.
 
-```
+```text
                      ┌─► nemotron (diarization) ─┐
 mic ─► audio_pipeline│                            ├─► event_aggregation ─► api_pipeline ─► POST /
                      └─► moonshine (ASR) ──────────┘
@@ -216,17 +216,59 @@ The knobs currently live as module-level constants in `main.py`:
 The client-side capture settings live in `AudioPipelineConfig`
 (`lib/audio_pipeline.py`): 16 kHz, mono, float32, 1600-sample blocks.
 
+## Quality control
+
+GitHub Actions runs on every push and pull request
+(`.github/workflows/ci.yml`):
+
+| Job | What it enforces |
+| --- | --- |
+| `lint` | `ruff check` and `ruff format --check`, against the rule set in `pyproject.toml`. |
+| `hygiene` | No trailing whitespace, every file ends in a newline, no leftover merge conflict markers. |
+| `test` | `pytest`, with a coverage floor that fails the build if coverage drops below it. |
+| `audit` | `uv audit` against a recorded baseline of known advisories, so a new one fails the build. |
+| `docs` | `markdownlint` over this README. |
+| `smoke` | Advisory: imports every module against the full dependency set, catching dependency breakage the unit tests cannot see. |
+
+Two details worth knowing:
+
+**The test job is fast because it installs almost nothing.** The tests import
+only the standard library and pytest, so CI installs the dev dependency group
+alone and never pulls the multi-gigabyte torch and nemo stack. The `smoke` job
+is what exercises the full dependency set.
+
+**The dependency audit is baselined, not clean.** `uv audit` currently reports
+69 advisories, almost all in the transitive ML tree — 44 in `pillow`, 8 in
+`nemo-toolkit`, 6 in `filelock`, 5 in `pytorch-lightning`. They are listed in
+`qc/audit-baseline.txt` and ignored by CI, so the job passes today and fails
+the moment a new advisory appears. Regenerate the baseline after a dependency
+bump with:
+
+```sh
+./scripts/update-audit-baseline.sh
+```
+
+Review that diff carefully — every newly added ID is one CI will now accept
+silently.
+
 ## Development
 
 ```sh
-uv run pytest                                     # tests
-uv run pytest --cov=lib --cov-report=term-missing # with coverage
-uv run ruff check . && uv run ruff format .       # lint and format
-uv run pre-commit run --all-files                 # pre-commit hooks
+uv run pytest                    # tests
+uv run ruff check .              # lint
+uv run ruff format .             # format
+uv run pre-commit run --all-files # pre-commit hooks
+python3 scripts/check_hygiene.py # file hygiene
 ```
 
+Configuration lives in `pyproject.toml`: the pytest `testpaths` and coverage
+options, the coverage floor (`[tool.coverage.report] fail_under`), and the
+ruff rule set.
+
 Tests currently cover the segment overlap math and the event aggregation
-pipeline (`tests/test_event_aggregation_pipeline.py`).
+pipeline (`tests/test_event_aggregation_pipeline.py`). The model, audio and
+network paths are not unit tested — they need downloaded models and hardware,
+so `smoke` covers them by import instead.
 
 ## Known limitations
 

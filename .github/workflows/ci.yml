@@ -1,0 +1,133 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# The project's pyproject.toml pins uv to a pyenv-managed interpreter
+# (python-preference = "only-system", python-downloads = "never") so a local
+# checkout never silently runs a second, unpinned Python. CI wants the
+# opposite: a reproducible interpreter it controls. These overrides apply to
+# the workflow only and never touch the developer's machine.
+env:
+  UV_PYTHON_DOWNLOADS: automatic
+  UV_PYTHON_PREFERENCE: only-managed
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install dev tooling
+        run: uv sync --only-group dev
+      - name: ruff check
+        run: uv run --no-sync ruff check .
+      - name: ruff format
+        run: uv run --no-sync ruff format --check .
+
+  hygiene:
+    name: File hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # No install step: the checker is standard library only, so it runs
+      # before anything is downloaded.
+      - name: Check trailing whitespace, newlines and conflict markers
+        run: python3 scripts/check_hygiene.py
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      # The tests import nothing beyond the standard library and pytest, so
+      # this job deliberately installs only the dev group. It stays in the
+      # low seconds instead of pulling the multi-gigabyte torch/nemo stack.
+      - name: Install dev tooling
+        run: uv sync --only-group dev
+      - name: pytest
+        run: uv run --no-sync pytest
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          # No install step: uv audit reads uv.lock directly.
+      - name: Audit dependencies against the recorded baseline
+        run: |
+          args=()
+          while read -r id; do
+            case "$id" in ''|\#*) continue ;; esac
+            args+=(--ignore "$id")
+          done < qc/audit-baseline.txt
+          uv audit --preview-features audit-command "${args[@]}"
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: markdownlint
+        run: npx --yes markdownlint-cli2@0.24.0
+
+  smoke:
+    name: Import smoke test (advisory)
+    runs-on: ubuntu-latest
+    # Advisory while it settles: the model and audio modules have no unit
+    # tests, so importing them is the only check that the dependency tree
+    # still resolves. Flip this to blocking once the install has proved
+    # reliable on the runner image.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install full dependency set
+        run: uv sync
+      - name: Import every module
+        run: |
+          uv run --no-sync python - <<'PY'
+          import importlib
+          import pkgutil
+
+          import lib
+
+          failures = []
+          for module in pkgutil.iter_modules(lib.__path__):
+              name = f"lib.{module.name}"
+              try:
+                  importlib.import_module(name)
+              except Exception as exc:
+                  failures.append(f"{name}: {type(exc).__name__}: {exc}")
+
+          if failures:
+              raise SystemExit("import failures:\n" + "\n".join(failures))
+          print("all lib modules import cleanly")
+          PY
