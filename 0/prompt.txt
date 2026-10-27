@@ -1,0 +1,1 @@
+hello, create a hello.txt with a greet adn read it back
