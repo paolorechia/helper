@@ -1,0 +1,1 @@
+<bash-stdout>Hello! This is a greeting from Claude Code.</bash-stdout><bash-stderr></bash-stderr>
