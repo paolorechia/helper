@@ -1,0 +1,9 @@
+<task-notification>
+<task-id>a562bb940aa784c5b</task-id>
+<tool-use-id>Agent_73_dca1b14c</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-paolo-dev-helper/77a7002e-2cdd-4296-bcfd-a0992496d565/tasks/a562bb940aa784c5b.output</output-file>
+<status>failed</status>
+<summary>Agent "Research loop features in AI harnesses" failed: Agent terminated early due to an API error: API Error: Request rejected (429) · Go usage limit exceeded (error type rate_limit, HTTP 429, model sent to the API: kimi-k3)</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>I'll research these harnesses with parallel web searches, starting with the highest-priority ones.</result>
+</task-notification>
